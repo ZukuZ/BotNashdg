@@ -1,0 +1,10 @@
+extends layout
+
+block content  
+  center#bot
+    | Установите &nbsp;
+    a(href='http://get.adobe.com/ru/flashplayer/',target='_blank')='Adobe Flash Player'
+  #main
+  script.
+    var viewer_id=!{viewer_id}, auth_key='!{auth_key}', friends='!{friends}',swfsrc='!{swfsrc}', version='!{version}', access_token='!{access_token}';
+  script(src="/js/bot.js")

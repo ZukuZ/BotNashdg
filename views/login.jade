@@ -1,0 +1,23 @@
+extends layout
+
+block content  
+  .container
+    .row
+      .span12
+        center
+          - if(error)
+            .alert.alert-error='Ошибка авторизации!'          
+          form.well(id="login", method="POST", action="/login")
+            fieldset
+              legend='Авторизуйтесь на сайте vk.com'
+              - if(captcha)
+                img(src='//api.vk.com/captcha.php?sid='+captcha)
+                br
+                input(type="hidden", value=captcha, name='captcha_sid')
+                input(type="text",placeholder="введите captcha",name="captcha_key", required='true')
+                br
+              input(type="text",placeholder="логин",name="login", required='true')
+              br
+              input(type="password",placeholder="пароль",name="password", required='true')
+              hr
+              button.btn.btn-primary='Авторизоваться'

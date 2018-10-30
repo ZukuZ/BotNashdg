@@ -1,0 +1,135 @@
+.container
+  .row
+    .span12      
+      form#settings-form
+        fieldset
+        div(style="background-color:#eeeeee;padding:5px 5px 5px 5px;")
+          .row-fluid
+            .span7
+              table(width='100%')
+                    tr
+                      td(width='135px;')
+                        label#bot-status=" cтатус: "
+                          span.label.label-info=settings.run?'ЗАПУЩЕН':'ОСТАНОВЛЕН'
+                      td(align='left')   
+                        btn-group                     
+                          button.btn(class=settings.run?'btn-danger':'btn-primary', onclick="changeStatus(); return false;")=settings.run?'СТОП':'СТАРТ'                                            
+                          button.btn.btn-success(onclick="saveBotSettings(); return false;",disabled="true" ,id="save-settings")='Применить настройки'
+                          button.btn.btn-inverse(onclick="resetBotSettings(); return false;",id="reset-settings")='Сбросить настройки'                 
+              .card
+                center
+                  #userinfo(style="display:none;")
+                    label
+                      strong='Уровень: '
+                      - var levels = [0, 90, 200, 430, 800, 1200, 1600, 2100, 2800, 3600, 4700, 6100, 7900, 10300, 13500, 17500, 22600, 29500, 38300, 50000, 65000, 84000, 109000, 140000, 185000, 240000, 290000, 345000, 415000, 500000, 600000, 715000, 860000, 1000000, 1240000, 1500000, 1800000, 2150000, 2550000, 3030000, 3600000, 4300000, 5130000, 6110000, 7260000, 8594000, 10134000, 11834000, 13789000, 16029000, 18579000, 21479000, 24814000, 28644000, 33044000, 38104000, 43914000, 50594000, 58183100, 66910000, 76946000, 88480000, 101750000, 117010000, 134560000, 154740000, 177950000, 204640000, 235330000, 270620000, 311210000];
+                      span=udata.lvl+' (' + (udata.exp - levels[udata.lvl]) + '/' + (levels[udata.lvl + 1] - levels[udata.lvl]) + ')'
+                     label
+                      strong='Урон: '
+                      span=udata.dmgi
+                     label
+                      strong='Здоровье: '
+                      span=(udata.endur + udata.endur_items) * 15
+                    label
+                      strong='Удача: '
+                      span=(udata.luck + udata.luck_items)
+                     label
+                      strong='Клан: '
+                      span=(udata.clan_id?udata.clan_data.name:'')
+                    hr
+                    label
+                      strong='Патроны: '
+                      span=udata.money1
+                    label
+                      strong='Золото: '
+                      span=udata.money2
+                    label
+                      strong='Жетоны: '
+                      span=udata.money3
+                    label
+                      strong='Спички: '
+                      span=udata.money4
+                  label                                      
+                    a.btn.btn-primary(href='http://vk.com',target='_blank')                    
+                      i.fa.fa-vk
+                    &nbsp;&nbsp;&nbsp;&nbsp;                    
+                    strong='ID:&nbsp;'+udata.id+'&nbsp;&nbsp;'+udata.name                                          
+                    &nbsp;&nbsp;
+                    button#userinfo-click.btn.btn-mini(onclick="return false;")='?'
+                    script(type='text/javascript').
+                      $('#userinfo-click').popover({title:'Инфо',placement:'bottom',content:$('#userinfo').html(),html:true});
+                .card-body
+                  label.checkbox
+                    input(type='checkbox',value='',name='visit',checked=settings.visit)
+                    Ежедневно собирать жетоны у друзей
+                  label.checkbox
+                    input(type='checkbox',value='',name='jobs',checked=settings.jobs)
+                    Собирать прибыль
+                  label.checkbox
+                    input(type='checkbox',value='',name='task',checked=settings.task)
+                    Проходить миссии в районе
+                  select(name='locId')
+                    each val,index in mapdata                      
+                      option(value=index,selected=(settings.task && settings.task.locId==index))=val.name
+              #map(style="height:310px;resize:none;overflow-y: scroll;border: 1px solid #C1C1C1; background-color:white;")              
+                each map,index in mapdata                  
+                  span.label=map.name
+                  .accordion(id="npc"+map.id)                 
+                    each npc in map.npcs
+                      if npc.name                    
+                        .accordion-group
+                          .accordion-heading
+                            a.accordion-toggle(data-toggle="collapse",data-parent="#npc"+npc.id,href="#collapse"+npc.id)
+                              span=npc.name
+                          .accordion-body.collapse(id='collapse'+npc.id)
+                            .accordion-inner
+                              label.checkbox
+                                input(type="checkbox",value="",onchange="document.getElementById('npc"+npc.id+"-joinclan').disabled=!this.checked;",name="npc"+npc.id+"-join",checked=(npcdata[npc.id]&&npcdata[npc.id].join))
+                                Принимать приглашения
+                              label.checkbox
+                                input(id="npc"+npc.id+"-joinclan", type="checkbox",value="",name="npc"+npc.id+"-joinclan",checked=(npcdata[npc.id]&&npcdata[npc.id].joinclan),disabled=!(npcdata[npc.id]&&npcdata[npc.id].join))
+                                только от клана                            
+                              span='c '
+                              input.input-mini(type="number",min="0",max="24",value=npcdata[npc.id]?npcdata[npc.id].joinStartTime||0:0, name="npc"+npc.id+"-joinStartTime") 
+                              span=' до '
+                              input.input-mini(type="number",min="0",max="24",value=npcdata[npc.id]?npcdata[npc.id].joinEndTime||24:24, name="npc"+npc.id+"-joinEndTime")
+                              span=' часов'
+                              br
+                              label.checkbox
+                                input(type="checkbox",value="",onchange="document.getElementById('npc"+npc.id+"-clan').disabled=!this.checked;",name="npc"+npc.id+"-create",checked=(npcdata[npc.id]&&npcdata[npc.id].create))
+                                Создавать бой
+                              label.checkbox
+                                input(id="npc"+npc.id+"-clan", type="checkbox",value="",name="npc"+npc.id+"-clan",checked=(npcdata[npc.id]&&npcdata[npc.id].clan),disabled=!(npcdata[npc.id]&&npcdata[npc.id].create))
+                                клановый
+                              span='c '
+                              input.input-mini(type="number",min="0",max="24",value=npcdata[npc.id]?npcdata[npc.id].createStartTime||0:0, name="npc"+npc.id+"-createStartTime") 
+                              span=' до '
+                              input.input-mini(type="number",min="0",max="24",value=npcdata[npc.id]?npcdata[npc.id].createEndTime||24:24, name="npc"+npc.id+"-createEndTime")
+                              span=' часов'
+                              br
+                              label.checkbox
+                                input(type="checkbox",value="",name="npc"+npc.id+"-nolimit",checked=(npcdata[npc.id]&&npcdata[npc.id].nolimit))
+                                Создавать бой и принимать приглашения после достижения лимита (не более 100 в сутки)
+                              label.checkbox
+                                input(type="checkbox",value="",name="npc"+npc.id+"-callFriends",checked=(npcdata[npc.id]&&npcdata[npc.id].callFriends))
+                                Звать друзей в бой              
+            .span5
+              .card
+                center
+                  button.hide.btn.btn-mini.btn-danger#fight-log(onclick='return false;',style='width:200px;',data-toggle="modal",data-target="#fight-log-modal")='бой !!!'
+                .card-body
+                  textarea#bot-log(style="height:450px;width:95%;resize:none;font-size: xx-small;",readonly=true)
+form#iframe_data_form(method="post",action="/",style="display:none;")
+  input(type="hidden",name="data",value=data)
+#fight-log-modal.modal.hide(role="dialog",style='width:400px;')
+  center
+    strong#fight-name
+    br
+    span#fight-hp
+    br
+    span#fight-time    
+    br
+    div(style='width:420px; height:300px; border: 1px solid #C1C1C1; overflow-y: scroll;')
+      table.table.table-bordered.table-striped.table-condensed#fight-info(width="400px")
+  .modal-header
+    button.close(type='button', data-dismiss="modal",aria-hidden="true")='×'    
+  .modal-body
